@@ -1,35 +1,96 @@
-# Thermal Risk Backend - Phase 1
+# HeatSense — Hyperlocal Heat Stress Early Warning Backend
 
-This backend service provides weather ingestion functionality, retrieving forecast data for specific areas around Haldia.
+HeatSense is a FastAPI backend for a hyperlocal, ward-level heat stress early warning system focused on Haldia, West Bengal.
 
-## Tech Stack
-- Python 3.9+
-- FastAPI
-- Uvicorn
-- HTTPX
-- Open-Meteo (Free weather API)
+The current backend combines:
 
-## Setup
+- Live weather data from Open-Meteo
+- Haldia area coordinates
+- GIS-verified mapping of H-areas to municipal wards
+- Census of India 2011 ward-level population data
+- GIS-derived ward areas
+- Population-density indicators
+- 72-hour weather forecasts
 
-1. Create a virtual environment and install dependencies:
-```powershell
-python -m venv venv
-.\venv\Scripts\activate
-pip install -r requirements.txt
-```
+The backend is being developed as the data and API foundation for the HeatSense heat-stress risk engine.
 
-2. Start the FastAPI development server:
-```powershell
-uvicorn main:app --reload
-```
+---
 
-## Testing the API
+## Current Development Status
 
-To test the endpoint, open a new terminal or use any REST client (like Postman).
+### Phase 2 — Data & Weather Integration
 
-**Using cURL:**
-```powershell
-curl.exe "http://127.0.0.1:8000/api/weather?area_id=H01"
-```
+**Status: Complete and validated**
 
-You should receive a standardized JSON response containing the 72-hour forecast (temperature, humidity, wind speed) for Haldia Township.
+The current backend supports:
+
+1. H-area coordinate management
+2. Live Open-Meteo weather ingestion
+3. 26 Haldia municipal ward records
+4. GIS-based H-area → ward mapping
+5. Census 2011 ward population data
+6. GIS-derived ward areas
+7. Ward-level population density
+8. Combined weather + demographic API responses
+9. 72-hour weather forecasting
+
+### Upcoming — Phase 3
+
+The next development stage will add:
+
+- Thermal-stress calculations
+- Heat Index / WBGT-related metrics
+- Ward-level risk scoring
+- Risk categories
+- Explainable alert drivers
+- ML-based risk/prediction components where scientifically justified
+
+These components are not yet part of the production API.
+
+---
+
+## System Architecture
+
+```text
+                    ┌─────────────────────┐
+                    │   Haldia Areas      │
+                    │ haldia_areas.json   │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │ GIS Ward Mapping    │
+                    │ H-area → Ward       │
+                    └──────────┬──────────┘
+                               │
+              ┌────────────────┴────────────────┐
+              │                                 │
+              ▼                                 ▼
+   ┌─────────────────────┐          ┌─────────────────────┐
+   │ Census 2011 Data    │          │ Open-Meteo API      │
+   │ Population / Wards  │          │ Temperature / RH    │
+   └──────────┬──────────┘          │ Wind / Forecast     │
+              │                     └──────────┬──────────┘
+              ▼                                │
+   ┌─────────────────────┐                     │
+   │ Ward Density Data   │                     │
+   └──────────┬──────────┘                     │
+              │                                │
+              └────────────────┬───────────────┘
+                               ▼
+                    ┌─────────────────────┐
+                    │   FastAPI Backend   │
+                    │       main.py       │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    Weather + Ward + 
+                    Demographic Response
+
+                         ↓ Phase 3 ↓
+
+                    Thermal Stress Engine
+                         ↓
+                    Risk Assessment
+                         ↓
+                    HeatSense Alerts
