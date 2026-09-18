@@ -47,11 +47,8 @@ The next development stage will add:
 
 These components are not yet part of the production API.
 
----
-
 ## System Architecture
 
-```text
                     ┌─────────────────────┐
                     │   Haldia Areas      │
                     │ haldia_areas.json   │
@@ -86,11 +83,113 @@ These components are not yet part of the production API.
                                ▼
                     Weather + Ward + 
                     Demographic Response
+Tech Stack
+ Python 3.9+
+ FastAPI
+ Uvicorn
+ HTTPX
+ Open-Meteo
+ JSON
+ GIS / GeoJSON / KMZ boundary data
+ Census of India 2011 data      
 
-                         ↓ Phase 3 ↓
 
-                    Thermal Stress Engine
-                         ↓
-                    Risk Assessment
-                         ↓
-                    HeatSense Alerts
+Currently used weather variables:
+
+Air temperature
+Relative humidity
+Wind speed
+Forecast time
+
+
+
+Haldia Ward Boundaries
+
+Municipal ward boundaries are derived from the Haldia Municipal Boundary 2012 KMZ dataset.
+
+The GIS dataset contains 26 municipal wards.
+
+Ward areas used by the backend are calculated from the GIS boundary polygons rather than manually entered estimates.
+
+
+
+Running the Backend
+1. Create the virtual environment
+python -m venv venv
+2. Activate the environment
+.\venv\Scripts\activate
+3. Install dependencies
+pip install -r requirements.txt
+4. Start FastAPI
+python -m uvicorn main:app --reload
+
+The development server will normally be available at:
+
+http://127.0.0.1:8000
+Testing the API
+Get all areas
+curl.exe "http://127.0.0.1:8000/api/areas"
+Get weather for an area
+curl.exe "http://127.0.0.1:8000/api/weather?area_id=H01"
+Validation
+Population-Density Validation
+
+Run:
+
+python validate_population_density.py
+
+The validation checks:
+
+Exactly 26 ward records
+Ward numbers 1–26
+No duplicate wards
+Positive population values
+Positive GIS areas
+Correct population-density calculation
+No missing required fields
+
+Current result:
+
+7 passed, 0 failed
+Integration Validation
+
+Run:
+
+python validate_integration.py
+
+The integration validation checks:
+
+All 30 H-areas are present
+Original latitude/longitude values are preserved
+Ward numbers are valid
+Ward 1 population and density
+Ward 26 population and density
+Total Census population
+
+Current result:
+
+8 passed, 0 failed
+Important Data Integrity Notes
+Census and GIS
+
+Population values and ward boundaries come from separate source datasets:
+
+Population: Census of India 2011
+Boundaries/areas: Haldia Municipal Boundary 2012 GIS dataset
+
+Ward population density is calculated by combining these datasets.
+
+H-area Coordinates
+
+The existing H-area coordinates are preserved because they are used by the Open-Meteo weather integration.
+
+Synthetic Indicators
+
+The file:
+
+app/data/haldia_indicators.json
+
+contains earlier demonstration/synthetic indicators.
+
+These values should not be treated as measured or official Haldia data and should not be used as real-world training data without appropriate replacement or validation.
+
